@@ -22,12 +22,13 @@ public class MainActivity extends ActionBarActivity {
     public static void getDataFromCallback(String data){
     Toast.makeText(con,data,Toast.LENGTH_LONG).show();
 
-    }/*
+    }
     public static void getDataFromCallback2(String data){
-        t.setText(data);
+        //t.setText(data);
+        Toast.makeText(con,data,Toast.LENGTH_LONG).show();
 
-    }*/
-     TextView t;
+    }
+     static TextView t;
 
     dataRecv dataRecv = new dataRecv();
     static Context con;

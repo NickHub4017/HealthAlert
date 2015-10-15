@@ -44,8 +44,8 @@ ActToBroadcast actToBroadcast=new ActToBroadcast();
 
     @Override
     public void onDataFrameArrived(DataFrame dataFrame) {
-        int dt[]={dataFrame.spo2Percentage,dataFrame.pulseRate};
-
+     //   int dt[]={dataFrame.spo2Percentage,dataFrame.pulseRate};
+        MainActivity.getDataFromCallback2(dataFrame.toString());
     //    sendDataArray("data",dt);
         //sendData("data",);
         //MainActivity.getDataFromCallback2(dataFrame.toString()+" - "+dataFrame.pulseRate+" - "+dataFrame.spo2Percentage);
@@ -95,14 +95,14 @@ basecon=getBaseContext();
         CMS50FWConnectionListener cms50fwCallbacks = new HelathAlertCallback();
         cms50FWBluetoothConnectionManager.setCMS50FWConnectionListener(cms50fwCallbacks);
 
-
+/*
         try {
             cms50FWBluetoothConnectionManager.connect(getBaseContext());
         } catch (BluetoothNotAvailableException e) {
             e.printStackTrace();
         } catch (BluetoothNotEnabledException e) {
             e.printStackTrace();
-        }
+        }*/
         return START_STICKY;
     }
 
