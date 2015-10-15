@@ -1,0 +1,83 @@
+
+/*
+ * Copyright (c) 2015 Albert C. Braun
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+apply plugin: 'com.android.application'
+
+android {
+    compileSdkVersion 21
+    buildToolsVersion "21.1.2"
+
+    defaultConfig {
+        applicationId "com.nrv.healthalert"
+        minSdkVersion 16
+        targetSdkVersion 21
+        versionCode 2
+        versionName "1.01"
+    }
+
+    signingConfigs {
+        buildMachineRelease {
+            storeFile file(uri("file:" + System.getenv("RELEASE_KEYSTORE")))
+            storePassword System.getenv("RELEASE_KEYSTORE_PASSWORD")
+            keyAlias System.getenv("RELEASE_KEY_ALIAS")
+            keyPassword System.getenv("RELEASE_KEY_PASSWORD")
+        }
+    }
+
+    buildTypes {
+        buildMachineRelease {
+            minifyEnabled true
+            signingConfig signingConfigs.buildMachineRelease
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+            debuggable false
+        }
+        debug {
+            debuggable true
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+        }
+    }
+
+    project.ext.set("archivesBaseName", "healthalert");
+
+    // Automatically define tasks which create javadoc documentation.
+    // These tasks have names like "generateReleaseJavadoc", "generateDebugJavadoc", ...
+    android.applicationVariants.all { variant ->
+        task("generate${variant.name.capitalize()}Javadoc", type: Javadoc) {
+            title = "Documentation for Android $android.defaultConfig.versionName b$android.defaultConfig.versionCode"
+            destinationDir = new File("${project.getProjectDir()}/doc/compiled/", variant.baseName)
+            source = variant.javaCompile.source
+
+            ext.androidJar = "${android.sdkDirectory}/platforms/${android.compileSdkVersion}/android.jar"
+            classpath = files(variant.javaCompile.classpath.files) + files(ext.androidJar)
+
+            description "Generates Javadoc for $variant.name."
+
+            options.memberLevel = org.gradle.external.javadoc.JavadocMemberLevel.PRIVATE
+            options.links("http://docs.oracle.com/javase/7/docs/api/");
+            options.links("http://developer.android.com/reference/reference/");
+            exclude '**/BuildConfig.java'
+            exclude '**/R.java'
+        }
+    }
+}
+
+dependencies {
+    compile fileTree(dir: 'libs', include: ['*.jar'])
+    compile 'com.android.support:appcompat-v7:21.0.0'
+    compile 'com.android.support:support-v4:21.0.0'
+    compile project(':cms50fwlib')
+}
