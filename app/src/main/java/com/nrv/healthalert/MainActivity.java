@@ -1,5 +1,8 @@
 package com.nrv.healthalert;
 
+import android.app.Notification;
+import android.app.NotificationManager;
+import android.app.PendingIntent;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -21,7 +24,7 @@ public class MainActivity extends ActionBarActivity {
     static TextView pulsedata=null;
     static TextView lblview=null;
     getFromService getService=null;
-
+DBLink dbLink=null;
     public static void getDataFromCallback(String data){
         //spo2data.setText("hii");
     Toast.makeText(con,data,Toast.LENGTH_SHORT).show();
@@ -29,7 +32,7 @@ public class MainActivity extends ActionBarActivity {
     }
 
      static TextView t;
-
+    static Context refContext;
 
     static Context con;
     @Override
@@ -37,10 +40,10 @@ public class MainActivity extends ActionBarActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-
+        dbLink=new DBLink(this);
         spo2data=(TextView)findViewById(R.id.lbl_data_spo2precentage);
         pulsedata=(TextView)findViewById(R.id.lbl_data_pulserate);
-
+refContext=MainActivity.this;
 
 
         //lblview.setText("lbl");
@@ -49,15 +52,16 @@ public class MainActivity extends ActionBarActivity {
         getService=new getFromService();
         IntentFilter getdatafilter=new IntentFilter("Send.data.service");
         registerReceiver(getService,getdatafilter);
+
         con=getApplicationContext();
 
 
 
         lblview=(TextView)findViewById(R.id.lbl_data);
-
+        //Toast.makeText(getApplicationContext(),""+dbLink.getHighOxyLevel()+" "+dbLink.getHighPulLevel()+" "+dbLink.getLowOxyLevel()+" "+dbLink.getLowPulseLevel(),Toast.LENGTH_SHORT).show();
         Intent Serviceintent3 = new Intent(MainActivity.this, HelathAlertCallback.class);
         startService(Serviceintent3);
-
+        //bindService(Serviceintent3,)
         connectbtn=(Button)findViewById(R.id.connect_btn);
         connectbtn.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -71,14 +75,17 @@ public class MainActivity extends ActionBarActivity {
                 //HelathAlertCallback.startdata();
             }
         });
+
         startbtn=(Button)findViewById(R.id.start_btn);
         startbtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+                HelathAlertCallback.setCont(MainActivity.this);
                 Intent intent2 = new Intent();
                 intent2.setAction("Get.data.Service");
                 intent2.putExtra("Type", "Start");
                 sendBroadcast(intent2);
+//                Notify("pp","ok");
 //HelathAlertCallback.setContext(MainActivity.this);
                 Intent intent3 = new Intent();
                 intent3.setAction("Send.data.service");
@@ -116,6 +123,8 @@ public class MainActivity extends ActionBarActivity {
 
         return super.onOptionsItemSelected(item);
     }
+
+
     public static void getDataFromCallback2(String spdata,String prate){
         //t.setText(data);
         try {
@@ -134,6 +143,7 @@ public class getFromService extends BroadcastReceiver{
     @Override
     public void onReceive(Context context, Intent intent) {
         Toast.makeText(getApplicationContext(),"hi",Toast.LENGTH_SHORT).show();
+
     }
 }
 

@@ -56,6 +56,21 @@
 
         android:id="@+id/txt_maxpulse" />
 
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Telephone no"
+        android:id="@+id/lbl_phone_no" />
+
+    <EditText
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:maxLength="10"
+        android:ems="10"
+
+        android:id="@+id/txt_phone_no" />
+
+
     <Button
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
