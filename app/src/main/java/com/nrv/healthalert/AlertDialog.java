@@ -48,7 +48,7 @@ public class AlertDialog extends ActionBarActivity {
 
         Intent p=getIntent();
 
-            final MediaPlayer mp = MediaPlayer.create(getApplicationContext(), R.drawable.alert);
+            final MediaPlayer mp = MediaPlayer.create(getApplicationContext(), R.mipmap.palert);
             mp.setLooping(true);
             mp.start();
 
