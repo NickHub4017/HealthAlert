@@ -71,7 +71,7 @@ public void addLog(int oxlevel,int pul){
     ContentValues dummydata=new ContentValues();
     dummydata.put("oxlevel",oxlevel);
     dummydata.put("pullevel",pul);
-    sqLiteDatabase.insert("logmaindata", null, dummydata);
+    sqLiteDatabase.insert("logdata", null, dummydata);
 
 
 }
@@ -123,7 +123,7 @@ public void addLog(int oxlevel,int pul){
     }
     public Cursor getLog(){
         SQLiteDatabase p=this.getReadableDatabase();
-        String q="Select * from logmaindata where titl='highoxy'";
+        String q="Select * from logdata";
         Cursor c=p.rawQuery(q,null);
         return c;
     }

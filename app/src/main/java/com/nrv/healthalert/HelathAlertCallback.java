@@ -11,6 +11,7 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.media.MediaPlayer;
 import android.os.IBinder;
 import android.support.v7.app.ActionBarActivity;
 import android.telephony.SmsManager;
@@ -35,17 +36,67 @@ public class HelathAlertCallback extends Service implements CMS50FWConnectionLis
     static int maxspo2=0;
     static int minpulse=0;
     static  int maxpulse=0;
+    int errcount=0;
     static String tel="";
-    boolean issmsgone=false;
+   static boolean issmsgone=false;
     long startedtime=0,prev=0;
     View v ;
 DBLink dbLink=null;
+
    static Context basecon,actstartcon;
-    boolean isscreengone=false;
+    static boolean isscreengone=false;
     CMS50FWBluetoothConnectionManager cms50FWBluetoothConnectionManager = null;
 ActToBroadcast actToBroadcast=new ActToBroadcast();
 
+public static void reset(){
+    issmsgone=false;
+    isscreengone=false;
+    MainActivity.getDataFromCallback("Reset Done");
+}
     private static final String CMS50FW_BLUETOOTH_DEVICE_NAME = "SpO202";
+
+    @Override
+    public int onStartCommand(Intent intent, int flags, int startId) {
+        IntentFilter movementFilter;
+        dbLink=new DBLink(getBaseContext());
+
+        maxspo2=dbLink.getHighOxyLevel();
+        maxpulse=dbLink.getHighPulLevel();
+        minpulse=dbLink.getLowPulseLevel();
+        minspo2=dbLink.getLowOxyLevel();
+        tel=dbLink.getphoneno();
+        movementFilter = new IntentFilter("Get.data.Service");
+        registerReceiver(actToBroadcast, movementFilter);
+
+        basecon=getBaseContext();
+        int res= super.onStartCommand(intent, flags, startId);
+        Log.d("Service", "Start");
+
+
+        cms50FWBluetoothConnectionManager = new CMS50FWBluetoothConnectionManager(CMS50FW_BLUETOOTH_DEVICE_NAME);
+        CMS50FWConnectionListener cms50fwCallbacks = new HelathAlertCallback();
+        cms50FWBluetoothConnectionManager.setCMS50FWConnectionListener(cms50fwCallbacks);
+
+/*
+        try {
+            cms50FWBluetoothConnectionManager.connect(getBaseContext());
+        } catch (BluetoothNotAvailableException e) {
+            e.printStackTrace();
+        } catch (BluetoothNotEnabledException e) {
+            e.printStackTrace();
+        }*/
+        return START_NOT_STICKY;
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+
+        MainActivity.getDataFromCallback("Service Shutting down");
+        cms50FWBluetoothConnectionManager.stopData();
+        cms50FWBluetoothConnectionManager.reset();
+    }
+
     @Override
     public void onConnectionAttemptInProgress() {
         //sendData("ConnectAttempt","NA");
@@ -54,6 +105,10 @@ ActToBroadcast actToBroadcast=new ActToBroadcast();
     @Override
     public void onConnectionEstablished() {
 //sendData("onConnectionEstablished","NA");
+
+            //cms50FWBluetoothConnectionManager.connect(basecon);
+            isscreengone=false;
+            issmsgone=false;
 
     }
 
@@ -71,6 +126,11 @@ ActToBroadcast actToBroadcast=new ActToBroadcast();
         try {
             if(!dataFrame.isFingerOutOfSleeve && dataFrame.spo2Percentage<=100) {
                 MainActivity.getDataFromCallback2(" " + dataFrame.spo2Percentage, "              " + dataFrame.pulseRate);
+//                dbLink.addLog(dataFrame.spo2Percentage,dataFrame.pulseRate);
+
+
+
+
                 String spo2message="SPO2 Level is Good";
                 String pulseratemessage="Pulse Rate is Good";
                 boolean indanger=true;
@@ -100,19 +160,30 @@ ActToBroadcast actToBroadcast=new ActToBroadcast();
                     Log.d("Error", "PulseLOW");
                 }
 
-                if((isspo2error || ispulseerror)&& indanger && !isscreengone ){
-//Notify("Alert",spo2message + " "+pulseratemessage);
-                    startedtime=dataFrame.time;
-                    startAlert(startedtime,spo2message,pulseratemessage);
+                if((isspo2error || ispulseerror)&& indanger){
+//Notify("alert",spo2message + " "+pulseratemessage);
+                    errcount++;
+
+                    if((errcount>30) && !AlertDialog.isShown) {
+                        errcount=0;
+                        startedtime = dataFrame.time;
+                        startAlert(startedtime, spo2message, pulseratemessage);
+                        isscreengone = true;
+                    }
+
 
 
                 }
-
+                else{
+                errcount=0;
+                }
 
                 if(isscreengone){
                     Intent j=new Intent();
                     j.setAction("Send.data.notify");
                     j.putExtra("data", dataFrame.time);
+                    j.putExtra("ox", dataFrame.spo2Percentage);
+                    j.putExtra("pu", dataFrame.pulseRate);
                     basecon.sendBroadcast(j);
                     long gap=((dataFrame.time/1000) - (startedtime/1000));
 
@@ -121,7 +192,7 @@ ActToBroadcast actToBroadcast=new ActToBroadcast();
                         issmsgone=true;
 
                         String phoneNo = tel;
-                        String msg = "Health Alert....";
+                        String msg = "Health alert....";
                         if(isspo2error && !ispulseerror) {
                             msg = msg + spo2message;
                         }
@@ -153,10 +224,10 @@ ActToBroadcast actToBroadcast=new ActToBroadcast();
             }
             else if(dataFrame.isFingerOutOfSleeve){
                 MainActivity.getDataFromCallback2(" NA", "              NA");
-                isscreengone=false;
-                issmsgone=false;
+                //isscreengone=false;
+                //issmsgone=false;
             }
-            else{
+            else {
                 MainActivity.getDataFromCallback2(" NA", "              NA");
             }
 
@@ -196,38 +267,6 @@ ActToBroadcast actToBroadcast=new ActToBroadcast();
         return null;
     }
 
-    @Override
-    public int onStartCommand(Intent intent, int flags, int startId) {
-        IntentFilter movementFilter;
-        dbLink=new DBLink(getBaseContext());
-
-        maxspo2=dbLink.getHighOxyLevel();
-        maxpulse=dbLink.getHighPulLevel();
-        minpulse=dbLink.getLowPulseLevel();
-        minspo2=dbLink.getLowOxyLevel();
-        tel=dbLink.getphoneno();
-        movementFilter = new IntentFilter("Get.data.Service");
-        registerReceiver(actToBroadcast, movementFilter);
-
-basecon=getBaseContext();
-        int res= super.onStartCommand(intent, flags, startId);
-        Log.d("Service", "Start");
-
-
-        cms50FWBluetoothConnectionManager = new CMS50FWBluetoothConnectionManager(CMS50FW_BLUETOOTH_DEVICE_NAME);
-        CMS50FWConnectionListener cms50fwCallbacks = new HelathAlertCallback();
-        cms50FWBluetoothConnectionManager.setCMS50FWConnectionListener(cms50fwCallbacks);
-
-/*
-        try {
-            cms50FWBluetoothConnectionManager.connect(getBaseContext());
-        } catch (BluetoothNotAvailableException e) {
-            e.printStackTrace();
-        } catch (BluetoothNotEnabledException e) {
-            e.printStackTrace();
-        }*/
-        return START_STICKY;
-    }
     public static void setupdata(int minsp,int minpul,int maxsp,int maxpul,String telno){
         minpulse=minpul;
         minspo2=minsp;
@@ -245,11 +284,12 @@ basecon=getBaseContext();
         actstartcon=p;
     }
     public void startAlert(long y,String spmsg,String pulmsg){
-        isscreengone=true;
-        Log.d("Error", "Indanger");
+
+        //Log.d("Error", "Indanger");
         //indanger=false;
-        //MainActivity.getDataFromCallback("Alert");
+        //MainActivity.getDataFromCallback("alert");
         Intent alertIntent=new Intent(actstartcon,AlertDialog.class);
+
         alertIntent.putExtra("spo2msg",spmsg);
         alertIntent.putExtra("pulsemsg",pulmsg);
         alertIntent.putExtra("time",y);
@@ -291,6 +331,7 @@ basecon=getBaseContext();
 
             else if(y.equals("data")){
                 cms50FWBluetoothConnectionManager.stopData();
+                dbLink.addLog(1, 2);
                 /*minspo2=intent.getIntExtra("minspo2",40);
                 maxspo2=intent.getIntExtra("maxspo2",90);
                 minpulse=intent.getIntExtra("minpulse",50);

@@ -10,6 +10,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.graphics.Color;
+import android.media.MediaPlayer;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v7.app.ActionBarActivity;
@@ -19,6 +20,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import java.util.TimerTask;
 
@@ -28,13 +30,29 @@ import java.util.TimerTask;
 public class AlertDialog extends ActionBarActivity {
     Button pausebtn;
     static boolean gosmsalert=true;
+    static boolean isShown=false;
     long tm=0;
+    MediaPlayer mp=new MediaPlayer();
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        isShown=true;
+    }
+
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.alertdialog);/**/
 
         Intent p=getIntent();
+
+            final MediaPlayer mp = MediaPlayer.create(getApplicationContext(), R.drawable.alert);
+            mp.setLooping(true);
+            mp.start();
+
+
 
         String spo2msg=p.getStringExtra("spo2msg");
         String pulsemsg=p.getStringExtra("pulsemsg");
@@ -72,7 +90,14 @@ public class AlertDialog extends ActionBarActivity {
             @Override
             public void onClick(View view) {
                gosmsalert=false;
+                HelathAlertCallback.reset();
+                //if(mp!=null){
 
+
+                    mp.pause();
+                    mp.setLooping(false);
+                    mp.stop();
+                //}
             }
         });
 

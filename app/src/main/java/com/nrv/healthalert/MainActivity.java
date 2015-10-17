@@ -7,6 +7,7 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.media.MediaPlayer;
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
 import android.view.Menu;
@@ -27,13 +28,14 @@ public class MainActivity extends ActionBarActivity {
 DBLink dbLink=null;
     public static void getDataFromCallback(String data){
         //spo2data.setText("hii");
-    Toast.makeText(con,data,Toast.LENGTH_SHORT).show();
+    //Toast.makeText(con,data,Toast.LENGTH_SHORT).show();
+        t.append("\n"+data);
 
     }
 
      static TextView t;
     static Context refContext;
-
+    Intent Serviceintent3;
     static Context con;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -45,6 +47,7 @@ DBLink dbLink=null;
         pulsedata=(TextView)findViewById(R.id.lbl_data_pulserate);
 refContext=MainActivity.this;
 
+        t=(TextView)findViewById(R.id.textView);
 
         //lblview.setText("lbl");
 
@@ -55,17 +58,19 @@ refContext=MainActivity.this;
 
         con=getApplicationContext();
 
+       // MediaPlayer mp=new MediaPlayer();
 
 
         lblview=(TextView)findViewById(R.id.lbl_data);
         //Toast.makeText(getApplicationContext(),""+dbLink.getHighOxyLevel()+" "+dbLink.getHighPulLevel()+" "+dbLink.getLowOxyLevel()+" "+dbLink.getLowPulseLevel(),Toast.LENGTH_SHORT).show();
-        Intent Serviceintent3 = new Intent(MainActivity.this, HelathAlertCallback.class);
+        Serviceintent3 = new Intent(MainActivity.this, HelathAlertCallback.class);
         startService(Serviceintent3);
         //bindService(Serviceintent3,)
         connectbtn=(Button)findViewById(R.id.connect_btn);
         connectbtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+                t.setText("Connection Log");
                 Intent intent2 = new Intent();
                 intent2.setAction("Get.data.Service");
                 intent2.putExtra("Type", "Connect");
@@ -87,15 +92,20 @@ refContext=MainActivity.this;
                 sendBroadcast(intent2);
 //                Notify("pp","ok");
 //HelathAlertCallback.setContext(MainActivity.this);
-                Intent intent3 = new Intent();
-                intent3.setAction("Send.data.service");
-                intent3.putExtra("Type", "Start");
-                sendBroadcast(intent3);
+
 
                 //HelathAlertCallback.startdata();
             }
         });
-
+    Button resetBtn=(Button)findViewById(R.id.reset_btn);
+        resetBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                stopService(Serviceintent3);
+                startService(Serviceintent3);
+                AlertDialog.isShown=false;
+            }
+        });
 
 
     }
@@ -120,6 +130,12 @@ refContext=MainActivity.this;
             startActivity(settings);
             return true;
         }
+        if (id == R.id.action_log) {
+            Intent settings=new Intent(MainActivity.this,ViewLog.class);
+            startActivity(settings);
+            return true;
+        }
+
 
         return super.onOptionsItemSelected(item);
     }
@@ -142,7 +158,7 @@ refContext=MainActivity.this;
 public class getFromService extends BroadcastReceiver{
     @Override
     public void onReceive(Context context, Intent intent) {
-        Toast.makeText(getApplicationContext(),"hi",Toast.LENGTH_SHORT).show();
+
 
     }
 }
