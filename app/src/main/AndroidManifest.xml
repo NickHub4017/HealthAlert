@@ -16,7 +16,14 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+        <activity android:name=".Settings"></activity>
+        <activity android:name=".AlertDialog"></activity>
         <service android:name=".HelathAlertCallback"></service>
+        <receiver android:name=".MainActivity$getFromService"></receiver>
+        <receiver
+            android:name=".AlertDialog$AlarmReceiver"
+            android:exported="false">
+        </receiver>
     </application>
 
 </manifest>

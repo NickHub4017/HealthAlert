@@ -17,30 +17,43 @@ import android.widget.Toast;
 public class MainActivity extends ActionBarActivity {
     Button connectbtn=null;
     Button startbtn=null;
-    TextView spo2data=null;
-    TextView pulsedata=null;
+    static TextView spo2data=null;
+    static TextView pulsedata=null;
+    static TextView lblview=null;
+    getFromService getService=null;
+
     public static void getDataFromCallback(String data){
-    Toast.makeText(con,data,Toast.LENGTH_LONG).show();
+        //spo2data.setText("hii");
+    Toast.makeText(con,data,Toast.LENGTH_SHORT).show();
 
     }
-    public static void getDataFromCallback2(String data){
-        //t.setText(data);
-        Toast.makeText(con,data,Toast.LENGTH_LONG).show();
 
-    }
      static TextView t;
 
-    dataRecv dataRecv = new dataRecv();
+
     static Context con;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        t=(TextView)findViewById(R.id.textView);
-        con=getApplicationContext();
         setContentView(R.layout.activity_main);
-        IntentFilter movementFilter;
-        movementFilter = new IntentFilter("Get.data.Intent");
-        registerReceiver(dataRecv, movementFilter);
+
+
+        spo2data=(TextView)findViewById(R.id.lbl_data_spo2precentage);
+        pulsedata=(TextView)findViewById(R.id.lbl_data_pulserate);
+
+
+
+        //lblview.setText("lbl");
+
+        //t.setText("p");
+        getService=new getFromService();
+        IntentFilter getdatafilter=new IntentFilter("Send.data.service");
+        registerReceiver(getService,getdatafilter);
+        con=getApplicationContext();
+
+
+
+        lblview=(TextView)findViewById(R.id.lbl_data);
 
         Intent Serviceintent3 = new Intent(MainActivity.this, HelathAlertCallback.class);
         startService(Serviceintent3);
@@ -54,6 +67,7 @@ public class MainActivity extends ActionBarActivity {
                 intent2.putExtra("Type", "Connect");
                 sendBroadcast(intent2);
 
+
                 //HelathAlertCallback.startdata();
             }
         });
@@ -65,13 +79,17 @@ public class MainActivity extends ActionBarActivity {
                 intent2.setAction("Get.data.Service");
                 intent2.putExtra("Type", "Start");
                 sendBroadcast(intent2);
+//HelathAlertCallback.setContext(MainActivity.this);
+                Intent intent3 = new Intent();
+                intent3.setAction("Send.data.service");
+                intent3.putExtra("Type", "Start");
+                sendBroadcast(intent3);
 
                 //HelathAlertCallback.startdata();
             }
         });
 
-        spo2data=(TextView)findViewById(R.id.lbl_data_spo2precentage);
-        pulsedata=(TextView)findViewById(R.id.lbl_data_pulserate);
+
 
     }
 
@@ -91,53 +109,33 @@ public class MainActivity extends ActionBarActivity {
 
         //noinspection SimplifiableIfStatement
         if (id == R.id.action_settings) {
+            Intent settings=new Intent(MainActivity.this,Settings.class);
+            startActivity(settings);
             return true;
         }
 
         return super.onOptionsItemSelected(item);
     }
+    public static void getDataFromCallback2(String spdata,String prate){
+        //t.setText(data);
+        try {
+            spo2data.setText(spdata);
+            pulsedata.setText(prate);
 
-    public class dataRecv extends BroadcastReceiver
-    {
-        @Override
-        public void onReceive(Context context, Intent intent) {
-           // Toast.makeText(getApplicationContext(), "dyn got it.." + intent.getStringExtra("Type"), Toast.LENGTH_LONG).show();
-            String type=intent.getStringExtra("Type");
-            if(type.equals("Start")){
-                //enable buttons
-            }
-            else if(type.equals("ConnectAttempt")){
-                //
-            }
-            else if(type.equals("onConnectionEstablished")){
-                //
-            }
-            else if(type.equals("onDataReadAttemptInProgress")){
-                //
-            }
-            else if(type.equals("onDataReadStopped")){
-                //
-            }
-            else if(type.equals("onBrokenConnection")){
-                //
-            }
-            else if(type.equals("onConnectionReset")){
-                //
-            }
-            else if(type.equals("data")){
-                int[] data=intent.getIntArrayExtra("data");
-                spo2data.setText(""+data[0]);
-                pulsedata.setText(""+data[1]);
-                //
-            }
-            else if(type.equals("log")){
-                String data=intent.getStringExtra("data");
-               Toast.makeText(getApplicationContext(),data,Toast.LENGTH_SHORT).show();
-                //
-            }
-
+        }catch (Exception e){
+           Toast.makeText(con,""+(lblview==null),Toast.LENGTH_SHORT).show();
         }
+        //Toast.makeText(con,data,Toast.LENGTH_LONG).show();
+
     }
+
+
+public class getFromService extends BroadcastReceiver{
+    @Override
+    public void onReceive(Context context, Intent intent) {
+        Toast.makeText(getApplicationContext(),"hi",Toast.LENGTH_SHORT).show();
+    }
+}
 
 
 

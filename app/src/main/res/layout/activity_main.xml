@@ -62,4 +62,12 @@
             android:id="@+id/lbl_data_pulserate" />
     </LinearLayout>
 
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textAppearance="?android:attr/textAppearanceLarge"
+        android:text=""
+        android:id="@+id/lbl_data" />
+
 </LinearLayout>
