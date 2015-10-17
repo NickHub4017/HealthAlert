@@ -151,6 +151,11 @@ ActToBroadcast actToBroadcast=new ActToBroadcast();
 
 
             }
+            else if(dataFrame.isFingerOutOfSleeve){
+                MainActivity.getDataFromCallback2(" NA", "              NA");
+                isscreengone=false;
+                issmsgone=false;
+            }
             else{
                 MainActivity.getDataFromCallback2(" NA", "              NA");
             }

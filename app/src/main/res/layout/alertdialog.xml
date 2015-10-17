@@ -4,35 +4,47 @@
     android:orientation="vertical">
 
     <TextView
-        android:layout_width="fill_parent"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="ALERT"
         android:id="@+id/textView2"
+        android:textSize="10mm"
         android:layout_gravity="center_horizontal"
         android:textAlignment="center"
         />
+<LinearLayout
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
+    android:orientation="vertical"
+    android:gravity="center">
 
     <TextView
-        android:layout_width="fill_parent"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="ALERT"
         android:id="@+id/spo2Alert"
+        android:textAppearance="?android:attr/textAppearanceLarge"
         android:layout_gravity="center_horizontal"
         android:textAlignment="center"
         />
 
     <TextView
-        android:layout_width="fill_parent"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="ALERT"
         android:id="@+id/pulseAlert"
+        android:textAppearance="?android:attr/textAppearanceLarge"
         android:layout_gravity="center_horizontal"
+
         android:textAlignment="center"
         />
 
     <Button
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="New Button"
+        android:text="ReSet"
+        android:layout_gravity="center_horizontal"
         android:id="@+id/alertpause" />
+</LinearLayout>
+
 </LinearLayout>
